@@ -16,10 +16,8 @@ import {
 import { Presentation } from "@bentley/presentation-frontend";
 import { AppNotificationManager, UiFramework } from "@bentley/ui-framework";
 import { getSupportedRpcs } from "../../common/rpcs";
-import { SelectElement } from "../app-ui/widgets/DeviceTree";
-import { WalkRoundTool } from "../feature/WalkRound";
 import { AppState, AppStore } from "./AppState";
-import { ITwinWebAccuSnap } from "./ITwinWebAccuSnap";
+
 
 /**
  * List of possible backends that ninezone-sample-app can use
@@ -61,8 +59,6 @@ export class NineZoneSampleApp {
     //此处QuantityFormatter类是imodel系统类，实际可能以用户自定义子类去实例化。
     const quantityFormatter = new QuantityFormatter();
     opts.quantityFormatter = quantityFormatter;
-    const accuSnap = new ITwinWebAccuSnap();
-    opts.accuSnap = accuSnap;
     await IModelApp.startup(opts);
     await IModelApp.authorizationClient?.signIn(new ClientRequestContext());
     // contains various initialization promises which need
@@ -93,14 +89,9 @@ export class NineZoneSampleApp {
 
     // the app is ready when all initialization promises are fulfilled
     await Promise.all(initPromises);
-    (IModelApp.accuSnap as ITwinWebAccuSnap).onDataButtonDown.addListener(
-      SelectElement
-    );
   }
   private static async registerTool() {
     await IModelApp.i18n.registerNamespace("NineZoneSample").readFinished;
-    ViewGlobeBirdTool.register(IModelApp.i18n.getNamespace("NineZoneSample"));
-    WalkRoundTool.register(IModelApp.i18n.getNamespace("NineZoneSample"));
   }
   private static async initializeRpc(): Promise<void> {
     const rpcInterfaces = getSupportedRpcs();

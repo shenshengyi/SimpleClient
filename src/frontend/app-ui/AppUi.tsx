@@ -17,9 +17,8 @@ import {
   SyncUiEventDispatcher,
   UiFramework,
 } from "@bentley/ui-framework";
-import { TestDeSerializationView } from "./frontstages/Feature";
 import { SampleFrontstage } from "./frontstages/SampleFrontstage";
-import { ClearSelectedDevice } from "./widgets/DeviceTree";
+
 interface iModelIdentifier {
   contextId: string;
   imodelId: string;
@@ -76,7 +75,6 @@ export class AppUi {
       imodelIdentifier.imodelId,
       OpenMode.Readonly
     );
-    imodel.selectionSet.onChanged.addListener(ClearSelectedDevice);
     UiFramework.setIModelConnection(imodel, true);
   }
   // Command that toggles the backstage
@@ -105,7 +103,6 @@ export class AppUi {
       frontstageProvider.frontstageDef
     ).then(() => {
       // Frontstage is ready
-      TestDeSerializationView();
     });
   }
   /** Pick the first two available spatial, orthographic or drawing view definitions in the imodel */

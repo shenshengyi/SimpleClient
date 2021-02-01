@@ -3,45 +3,24 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 import { ViewState } from "@bentley/imodeljs-frontend";
-import { StatusBarSection } from "@bentley/ui-abstract";
 import {
   BasicNavigationWidget,
-  ConfigurableUiManager,
   ContentGroup,
   ContentLayoutDef,
-  ContentViewManager,
   CoreTools,
   CustomItemDef,
   Frontstage,
   FrontstageProvider,
   IModelConnectedViewSelector,
   IModelViewportControl,
-  ItemList,
   ReviewToolWidget,
-  SelectionInfoField,
-  SnapModeField,
-  StagePanel,
-  StatusBarComposer,
-  StatusBarItem,
-  StatusBarItemUtilities,
-  StatusBarWidgetControl,
-  StatusBarWidgetControlArgs,
-  SyncUiEventId,
   ToolbarHelper,
   UiFramework,
-  ViewAttributesStatusField,
   Widget,
-  WidgetState,
-  withStatusFieldProps,
   Zone,
-  ZoneState,
 } from "@bentley/ui-framework";
 import * as React from "react";
-import { AppStatusBarWidget } from "../statusbars/AppStatusBar";
-import { PropertyGridWidget } from "../widgets/PropertyGridWidget";
-import { RenderModeInfoField } from "../widgets/TableWidget";
-import { DeviceWidget, TreeWidget } from "../widgets/TreeWidget";
-import { TestFeature } from "./Feature";
+
 
 /* eslint-disable react/jsx-key */
 
@@ -60,13 +39,6 @@ export class SampleFrontstage extends FrontstageProvider {
 
     // Create the content layouts.
     this._contentLayoutDef = new ContentLayoutDef({
-      verticalSplit: {
-        percentage: 0.5,
-        left: 0,
-        right: 1,
-        minSizeLeft: 100,
-        minSizeRight: 100,
-      },
     });
 
     // Create the content group.
@@ -76,13 +48,6 @@ export class SampleFrontstage extends FrontstageProvider {
           classId: IModelViewportControl,
           applicationData: {
             viewState: this.viewStates[0],
-            iModelConnection: UiFramework.getIModelConnection(),
-          },
-        },
-        {
-          classId: IModelViewportControl,
-          applicationData: {
-            viewState: this.viewStates[1],
             iModelConnection: UiFramework.getIModelConnection(),
           },
         },
@@ -126,95 +91,10 @@ export class SampleFrontstage extends FrontstageProvider {
             ]}
           />
         }
-        centerRight={
-          <Zone
-            defaultState={ZoneState.Minimized}
-            allowsMerging={true}
-            widgets={[
-              <Widget
-                control={TreeWidget}
-                fillZone={true}
-                iconSpec="icon-tree"
-                labelKey="NineZoneSample:components.tree"
-                applicationData={{
-                  iModelConnection: UiFramework.getIModelConnection(),
-                }}
-              />,
-            ]}
-          />
-        }
-        centerLeft={
-          <Zone
-            defaultState={ZoneState.Open}
-            allowsMerging={true}
-            widgets={[
-              <Widget
-                control={DeviceWidget}
-                fillZone={true}
-                iconSpec="icon-tree"
-                labelKey="NineZoneSample:components.tree"
-                preferredPanelSize="fit-content"
-                applicationData={{
-                  iModelConnection: UiFramework.getIModelConnection(),
-                }}
-              />,
-            ]}
-          />
-        }
-        bottomCenter={
-          <Zone
-            widgets={[
-              <Widget isStatusBar={true} control={AppStatusBarWidget} />,
-            ]}
-          />
-        }
-        bottomRight={
-          <Zone
-            defaultState={ZoneState.Open}
-            allowsMerging={true}
-            widgets={[
-              <Widget
-                id="Properties"
-                control={PropertyGridWidget}
-                defaultState={WidgetState.Closed}
-                fillZone={true}
-                iconSpec="icon-properties-list"
-                labelKey="NineZoneSample:components.properties"
-                applicationData={{
-                  iModelConnection: UiFramework.getIModelConnection(),
-                }}
-                syncEventIds={[SyncUiEventId.SelectionSetChanged]}
-                stateFunc={this._determineWidgetStateForSelectionSet}
-              />,
-            ]}
-          />
-        }
-        rightPanel={<StagePanel allowedZones={[6, 9]} />}
-        statusBar={
-          <Zone
-            widgets={[
-              <Widget
-                isStatusBar={true}
-                control={SmallStatusBarWidgetControl1}
-              />,
-            ]}
-          />
-        }
       />
     );
   }
 
-  /** Determine the WidgetState based on the Selection Set */
-  private _determineWidgetStateForSelectionSet = (): WidgetState => {
-    const activeContentControl = ContentViewManager.getActiveContentControl();
-    if (
-      activeContentControl &&
-      activeContentControl.viewport &&
-      activeContentControl.viewport.view.iModel.selectionSet.size > 0
-    )
-      return WidgetState.Open;
-    return WidgetState.Closed;
-  };
 
   /** Get the CustomItemDef for ViewSelector  */
   private get _viewSelectorItemDef() {
@@ -234,58 +114,6 @@ export class SampleFrontstage extends FrontstageProvider {
  */
 class SampleToolWidget extends React.Component {
   public render(): React.ReactNode {
-    const horizontalItems = new ItemList([...TestFeature.ItemLists]);
-    return <ReviewToolWidget suffixVerticalItems={horizontalItems} />;
+    return <ReviewToolWidget />;
   }
 }
-export class SmallStatusBarWidgetControl1 extends StatusBarWidgetControl {
-  private _statusBarItems: StatusBarItem[] | undefined;
-
-  private get statusBarItems(): StatusBarItem[] {
-    // tslint:disable-next-line: variable-name
-    const SnapAttributes = withStatusFieldProps(SnapModeField);
-    // tslint:disable-next-line: variable-name
-    const ViewAttributes = withStatusFieldProps(ViewAttributesStatusField);
-    // tslint:disable-next-line: variable-name
-    const SelectionInfo = withStatusFieldProps(SelectionInfoField);
-    const RenderModeInfo = withStatusFieldProps(RenderModeInfoField);
-    // tslint:disable-next-line: variable-name
-    if (!this._statusBarItems) {
-      this._statusBarItems = [
-        StatusBarItemUtilities.createStatusBarItem(
-          "ViewAttributes",
-          StatusBarSection.Center,
-          60,
-          <ViewAttributes />
-        ),
-        StatusBarItemUtilities.createStatusBarItem(
-          "SnapAttributes",
-          StatusBarSection.Left,
-          10,
-          <SnapAttributes />
-        ),
-        StatusBarItemUtilities.createStatusBarItem(
-          "SelectionInfo",
-          StatusBarSection.Right,
-          20,
-          <SelectionInfo />
-        ),
-        StatusBarItemUtilities.createStatusBarItem(
-          "RenderModeInfo",
-          StatusBarSection.Left,
-          30,
-          <RenderModeInfo />
-        ),
-      ];
-    }
-    return this._statusBarItems;
-  }
-
-  public getReactNode(_args: StatusBarWidgetControlArgs): React.ReactNode {
-    return <StatusBarComposer items={this.statusBarItems} />;
-  }
-}
-ConfigurableUiManager.registerControl(
-  "SmallStatusBar1",
-  SmallStatusBarWidgetControl1
-);
