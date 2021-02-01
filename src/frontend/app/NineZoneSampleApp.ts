@@ -6,36 +6,55 @@ import { ClientRequestContext, Config, Guid } from "@bentley/bentleyjs-core";
 import { FrontendAuthorizationClient } from "@bentley/frontend-authorization-client";
 import { IModelBankClient } from "@bentley/imodelhub-client";
 import { IModelBankBasicAuthorizationClient } from "@bentley/imodelhub-client/lib/imodelbank/IModelBankBasicAuthorizationClient";
-import { BentleyCloudRpcManager, IModelReadRpcInterface, IModelTileRpcInterface, RpcInterfaceDefinition, SnapshotIModelRpcInterface } from "@bentley/imodeljs-common";
 import {
-  IModelApp,
-  IModelAppOptions,
-  QuantityFormatter,
-  ViewGlobeBirdTool,
-} from "@bentley/imodeljs-frontend";
+  BentleyCloudRpcManager,
+  IModelReadRpcInterface,
+  IModelTileRpcInterface,
+  RpcInterfaceDefinition,
+  SnapshotIModelRpcInterface,
+} from "@bentley/imodeljs-common";
+import { IModelApp, IModelAppOptions } from "@bentley/imodeljs-frontend";
 import { PresentationRpcInterface } from "@bentley/presentation-common";
 import { Presentation } from "@bentley/presentation-frontend";
-import { AppNotificationManager, UiFramework } from "@bentley/ui-framework";
-import { AppState, AppStore } from "./AppState";
+import { AppNotificationManager, FrameworkReducer, FrameworkState, UiFramework } from "@bentley/ui-framework";
+import { combineReducers, createStore, Store } from "redux";
+
+// React-redux interface stuff
+export interface RootState {
+  frameworkState?: FrameworkState;
+}
+
+export type AppStore = Store<RootState>;
 
 /**
- * List of possible backends that ninezone-sample-app can use
+ * Centralized state management class using  Redux actions, reducers and store.
  */
-export enum UseBackend {
-  /** Use local ninezone-sample-app backend */
-  Local = 0,
+export class AppState {
+  private _store: AppStore;
+  private _rootReducer: any;
 
-  /** Use deployed general-purpose backend */
-  GeneralPurpose = 1,
+  constructor() {
+    // this is the rootReducer for the sample application.
+    this._rootReducer = combineReducers<RootState>({
+      frameworkState: FrameworkReducer,
+    } as any);
+
+    // create the Redux Store.
+    this._store = createStore(
+      this._rootReducer,
+      (window as any).__REDUX_DEVTOOLS_EXTENSION__ &&
+        (window as any).__REDUX_DEVTOOLS_EXTENSION__()
+    );
+  }
+
+  public get store(): Store<RootState> {
+    return this._store;
+  }
 }
 
 // subclass of IModelApp needed to use imodeljs-frontend
 export class NineZoneSampleApp {
   private static _appState: AppState;
-
-  public static get oidcClient(): FrontendAuthorizationClient {
-    return IModelApp.authorizationClient as FrontendAuthorizationClient;
-  }
 
   public static get store(): AppStore {
     return this._appState.store;
@@ -55,9 +74,7 @@ export class NineZoneSampleApp {
       { id: Guid.createValue() },
       { email, password }
     );
-    //此处QuantityFormatter类是imodel系统类，实际可能以用户自定义子类去实例化。
-    const quantityFormatter = new QuantityFormatter();
-    opts.quantityFormatter = quantityFormatter;
+
     await IModelApp.startup(opts);
     await IModelApp.authorizationClient?.signIn(new ClientRequestContext());
     // contains various initialization promises which need
@@ -77,7 +94,6 @@ export class NineZoneSampleApp {
 
     // initialize UiFramework
     initPromises.push(UiFramework.initialize(this.store, IModelApp.i18n));
-    IModelApp.quantityFormatter.useImperialFormats = false;
     initPromises.push(NineZoneSampleApp.registerTool());
     // initialize Presentation
     initPromises.push(

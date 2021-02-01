@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 import { Config, OpenMode } from "@bentley/bentleyjs-core";
 import {
-  BriefcaseConnection,
   IModelConnection,
   RemoteBriefcaseConnection,
   ViewState,
@@ -19,11 +18,6 @@ import {
 } from "@bentley/ui-framework";
 import { SampleFrontstage } from "./frontstages/SampleFrontstage";
 
-interface iModelIdentifier {
-  contextId: string;
-  imodelId: string;
-}
-
 /**
  * Example Ui Configuration for an iModel.js App
  */
@@ -31,57 +25,11 @@ export class AppUi {
   // Initialize the ConfigurableUiManager
   public static initialize() {
     ConfigurableUiManager.initialize();
-    AppUi.InitIModelIdentifier();
-  }
-  public static iModelIdentifierList: iModelIdentifier[] = [];
-  public static InitIModelIdentifier() {
-    const contextId1 = Config.App.get("imjs_contextId_1");
-    const imodelId1 = Config.App.get("imjs_imodelId_1");
-    AppUi.iModelIdentifierList.push({
-      contextId: contextId1,
-      imodelId: imodelId1,
-    });
-
-    const contextId2 = Config.App.get("imjs_contextId_2");
-    const imodelId2 = Config.App.get("imjs_imodelId_2");
-    AppUi.iModelIdentifierList.push({
-      contextId: contextId2,
-      imodelId: imodelId2,
-    });
-
-    const contextId0 = Config.App.get("imjs_contextId_0");
-    const imodelId0 = Config.App.get("imjs_imodelId_0");
-    AppUi.iModelIdentifierList.push({
-      contextId: contextId0,
-      imodelId: imodelId0,
-    });
-  }
-
-  public static async CreateIModelConnection(index: number) {
-    if (index >= AppUi.iModelIdentifierList.length || index < 0) {
-      alert("将要打开的imodel索引不合法!");
-      return;
-    }
-    const currentIModelConnection = UiFramework.getIModelConnection();
-    if (currentIModelConnection) {
-      SyncUiEventDispatcher.clearConnectionEvents(currentIModelConnection);
-      currentIModelConnection.selectionSet.onChanged.clear();
-      await currentIModelConnection.close();
-    }
-    // attempt to open the imodel
-    const imodelIdentifier = AppUi.iModelIdentifierList[index];
-    const imodel = await RemoteBriefcaseConnection.open(
-      imodelIdentifier.contextId,
-      imodelIdentifier.imodelId,
-      OpenMode.Readonly
-    );
-    UiFramework.setIModelConnection(imodel, true);
   }
   // Command that toggles the backstage
   public static get backstageToggleCommand(): CommandItemDef {
     return BackstageManager.getBackstageToggleCommand();
   }
-
   /** Handle when an iModel and the views have been selected  */
   public static handleIModelViewsSelected(
     iModelConnection: IModelConnection,

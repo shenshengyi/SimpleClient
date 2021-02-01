@@ -22,11 +22,6 @@ import {
 import * as React from "react";
 
 
-/* eslint-disable react/jsx-key */
-
-/**
- * Sample Frontstage for 9-Zone sample application
- */
 export class SampleFrontstage extends FrontstageProvider {
   // Content layout for content views
   private _contentLayoutDef: ContentLayoutDef;
@@ -68,11 +63,10 @@ export class SampleFrontstage extends FrontstageProvider {
         topLeft={
           <Zone
             widgets={[
-              <Widget isFreeform={true} element={<SampleToolWidget />} />,
+              <Widget isFreeform={true} element={<ReviewToolWidget />} />,
             ]}
           />
         }
-        topCenter={<Zone widgets={[<Widget isToolSettings={true} />]} />}
         topRight={
           <Zone
             widgets={[
@@ -106,14 +100,5 @@ export class SampleFrontstage extends FrontstageProvider {
         />
       ),
     });
-  }
-}
-
-/**
- * Define a ToolWidget with Buttons to display in the TopLeft zone.
- */
-class SampleToolWidget extends React.Component {
-  public render(): React.ReactNode {
-    return <ReviewToolWidget />;
   }
 }

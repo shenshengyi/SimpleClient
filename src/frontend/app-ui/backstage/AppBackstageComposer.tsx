@@ -1,19 +1,23 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
-* See LICENSE.md in the project root for license terms and full copyright notice.
-*--------------------------------------------------------------------------------------------*/
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
 import { UserInfo } from "@bentley/itwin-client";
-import { BackstageComposer, UserProfileBackstageItem } from "@bentley/ui-framework";
+import { BackstageItem } from "@bentley/ui-abstract";
+import {
+  BackstageComposer,
+  BackstageItemUtilities,
+  UserProfileBackstageItem,
+} from "@bentley/ui-framework";
 import * as React from "react";
 import { connect } from "react-redux";
-import { RootState } from "../../app/AppState";
-import { AppBackstageItemProvider } from "./AppBackstageItemProvider";
+import { RootState } from "../../app/NineZoneSampleApp";
+
 
 function mapStateToProps(state: RootState) {
   const frameworkState = state.frameworkState;
 
-  if (!frameworkState)
-    return undefined;
+  if (!frameworkState) return undefined;
 
   return { userInfo: frameworkState.sessionState.userInfo };
 }
@@ -28,11 +32,38 @@ export class AppBackstageComposerComponent extends React.PureComponent<AppBackst
   public render() {
     return (
       <BackstageComposer
-        header={this.props.userInfo && <UserProfileBackstageItem userInfo={this.props.userInfo} />}
+        header={
+          this.props.userInfo && (
+            <UserProfileBackstageItem userInfo={this.props.userInfo} />
+          )
+        }
         items={[...this._itemsProvider.backstageItems]}
       />
     );
   }
 }
+export class AppBackstageItemProvider {
+  /** id of provider */
+  public readonly id = "ninezone-sample-app.AppBackstageItemProvider";
 
-export const AppBackstageComposer = connect(mapStateToProps)(AppBackstageComposerComponent); // eslint-disable-line @typescript-eslint/naming-convention
+  private _backstageItems: ReadonlyArray<BackstageItem> | undefined = undefined;
+
+  public get backstageItems(): ReadonlyArray<BackstageItem> {
+    if (!this._backstageItems) {
+      this._backstageItems = [
+        BackstageItemUtilities.createStageLauncher(
+          "SampleFrontstage",
+          100,
+          10,
+          "金塔合并",
+          undefined,
+          "icon-placeholder"
+        ),
+      ];
+    }
+    return this._backstageItems;
+  }
+}
+export const AppBackstageComposer = connect(mapStateToProps)(
+  AppBackstageComposerComponent
+); // eslint-disable-line @typescript-eslint/naming-convention

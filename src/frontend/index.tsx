@@ -4,28 +4,22 @@
  *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-
-import { Logger, LogLevel } from "@bentley/bentleyjs-core";
-
 import { NineZoneSampleApp } from "./app/NineZoneSampleApp";
 import { AppUi } from "./app-ui/AppUi";
-import App, { AppComposer } from "./components/App";
+import { AppComposer } from "./components/App";
 import "./index.scss";
-import { UiFramework } from "@bentley/ui-framework";
 import { Provider } from "react-redux";
-
-// Setup logging immediately to pick up any logging during NineZoneSampleApp.startup()
-Logger.initializeToConsole();
-Logger.setLevelDefault(LogLevel.Warning);
+import { Config, OpenMode } from "@bentley/bentleyjs-core";
+import { RemoteBriefcaseConnection } from "@bentley/imodeljs-frontend";
+import { UiFramework } from "@bentley/ui-framework";
 
 (async () => {
-  // eslint-disable-line @typescript-eslint/no-floating-promises
   // Start the app.
   await NineZoneSampleApp.startup();
 
   // Initialize the AppUi & ConfigurableUiManager
   AppUi.initialize();
-  await AppUi.CreateIModelConnection(0);
+  await CreateIModelConnection();
   // when initialization is complete, render
   ReactDOM.render(
     <Provider store={NineZoneSampleApp.store}>
@@ -34,3 +28,14 @@ Logger.setLevelDefault(LogLevel.Warning);
     document.getElementById("root") as HTMLElement
   );
 })();
+
+async function CreateIModelConnection() {
+  const contextId1 = Config.App.get("imjs_contextId_1");
+  const imodelId1 = Config.App.get("imjs_imodelId_1");
+  const imodel = await RemoteBriefcaseConnection.open(
+    contextId1,
+    imodelId1,
+    OpenMode.Readonly
+  );
+  UiFramework.setIModelConnection(imodel, true);
+}

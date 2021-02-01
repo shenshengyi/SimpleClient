@@ -14,17 +14,12 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { AppUi } from "../app-ui/AppUi";
 import { AppBackstageComposer } from "../app-ui/backstage/AppBackstageComposer";
-import { RootState } from "../app/AppState";
-import { NineZoneSampleApp } from "../app/NineZoneSampleApp";
+import { RootState } from "../app/NineZoneSampleApp";
+
 import "./App.css";
 
 /** React state of the App component */
 export interface AppState {
-  user: {
-    isAuthorized: boolean;
-    isLoading?: boolean;
-  };
-  offlineIModel: boolean;
   imodel?: IModelConnection;
   viewStates?: ViewState[];
 }
@@ -37,11 +32,6 @@ export default class App extends React.Component<AppProp, AppState> {
   constructor(props: AppProp) {
     super(props);
     this.state = {
-      user: {
-        isAuthorized: NineZoneSampleApp.oidcClient.isAuthorized,
-        isLoading: false,
-      },
-      offlineIModel: false,
       imodel: props.imodel,
       viewStates: undefined,
     };
@@ -74,12 +64,7 @@ export default class App extends React.Component<AppProp, AppState> {
       alert(e.message);
     }
   };
-  private delayedInitialization() {
-    if (this.state.offlineIModel) {
-      // WORKAROUND: Clear authorization client if operating in offline mode
-      IModelApp.authorizationClient = undefined;
-    }
-  }
+
 
   /** The component's render method */
   public render() {
@@ -87,17 +72,11 @@ export default class App extends React.Component<AppProp, AppState> {
     let style: React.CSSProperties = {};
 
     if (!this.state.imodel || !this.state.viewStates) {
-      // NOTE: We needed to delay some initialization until now so we know if we are opening a snapshot or an imodel.
-      this.delayedInitialization();
-      // if we don't have an imodel / view definition id - render a button that initiates imodel open
       ui = <div>正在打开模型.....</div>;
     } else {
-      // if we do have an imodel and view definition id - render imodel components
       ui = <IModelComponents />;
       style = { display: "none" };
     }
-
-    // render the app
     return (
       <div className="App">
         <div className="Header" style={style}>
@@ -109,7 +88,6 @@ export default class App extends React.Component<AppProp, AppState> {
   }
 }
 
-/** Renders a viewport, a tree, a property grid and a table */
 class IModelComponents extends React.PureComponent {
   public render() {
     return <ConfigurableUiContent appBackstage={<AppBackstageComposer />} />;
@@ -121,4 +99,4 @@ function mapStateToProps(state: RootState) {
   if (!frameworkState) return undefined;
   return { imodel: frameworkState.sessionState.iModelConnection! };
 }
-export const AppComposer = connect(mapStateToProps)(App); // eslint-disable-line @typescript-eslint/naming-convention
+export const AppComposer = connect(mapStateToProps)(App);
