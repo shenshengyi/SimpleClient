@@ -6,18 +6,17 @@ import { ClientRequestContext, Config, Guid } from "@bentley/bentleyjs-core";
 import { FrontendAuthorizationClient } from "@bentley/frontend-authorization-client";
 import { IModelBankClient } from "@bentley/imodelhub-client";
 import { IModelBankBasicAuthorizationClient } from "@bentley/imodelhub-client/lib/imodelbank/IModelBankBasicAuthorizationClient";
-import { BentleyCloudRpcManager } from "@bentley/imodeljs-common";
+import { BentleyCloudRpcManager, IModelReadRpcInterface, IModelTileRpcInterface, RpcInterfaceDefinition, SnapshotIModelRpcInterface } from "@bentley/imodeljs-common";
 import {
   IModelApp,
   IModelAppOptions,
   QuantityFormatter,
   ViewGlobeBirdTool,
 } from "@bentley/imodeljs-frontend";
+import { PresentationRpcInterface } from "@bentley/presentation-common";
 import { Presentation } from "@bentley/presentation-frontend";
 import { AppNotificationManager, UiFramework } from "@bentley/ui-framework";
-import { getSupportedRpcs } from "../../common/rpcs";
 import { AppState, AppStore } from "./AppState";
-
 
 /**
  * List of possible backends that ninezone-sample-app can use
@@ -102,4 +101,12 @@ export class NineZoneSampleApp {
     };
     BentleyCloudRpcManager.initializeClient(rpcParams, rpcInterfaces);
   }
+}
+export function getSupportedRpcs(): RpcInterfaceDefinition[] {
+  return [
+    IModelReadRpcInterface,
+    IModelTileRpcInterface,
+    PresentationRpcInterface,
+    SnapshotIModelRpcInterface,
+  ];
 }

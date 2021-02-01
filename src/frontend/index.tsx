@@ -7,7 +7,6 @@ import * as ReactDOM from "react-dom";
 
 import { Logger, LogLevel } from "@bentley/bentleyjs-core";
 
-import { AppLoggerCategory } from "../common/LoggerCategory";
 import { NineZoneSampleApp } from "./app/NineZoneSampleApp";
 import { AppUi } from "./app-ui/AppUi";
 import App, { AppComposer } from "./components/App";
@@ -18,7 +17,6 @@ import { Provider } from "react-redux";
 // Setup logging immediately to pick up any logging during NineZoneSampleApp.startup()
 Logger.initializeToConsole();
 Logger.setLevelDefault(LogLevel.Warning);
-Logger.setLevel(AppLoggerCategory.Frontend, LogLevel.Info);
 
 (async () => {
   // eslint-disable-line @typescript-eslint/no-floating-promises
