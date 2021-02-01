@@ -13,6 +13,19 @@ import { Config, OpenMode } from "@bentley/bentleyjs-core";
 import { RemoteBriefcaseConnection } from "@bentley/imodeljs-frontend";
 import { UiFramework } from "@bentley/ui-framework";
 
+const DisplayApp = () => {
+  return (
+    <div>
+      <div style={{ float: "left", width: "50%" }}>
+        <h1>欢迎使用iTwin.js</h1>
+      </div>
+      <Provider store={NineZoneSampleApp.store}>
+        <AppComposer />
+      </Provider>
+    </div>
+  );
+};
+
 (async () => {
   // Start the app.
   await NineZoneSampleApp.startup();
@@ -22,9 +35,7 @@ import { UiFramework } from "@bentley/ui-framework";
   await CreateIModelConnection();
   // when initialization is complete, render
   ReactDOM.render(
-    <Provider store={NineZoneSampleApp.store}>
-      <AppComposer />
-    </Provider>,
+    <DisplayApp />,
     document.getElementById("root") as HTMLElement
   );
 })();
